@@ -1,0 +1,9 @@
+{
+    "NVR_USER": "your_user",
+    "NVR_PASS": "your_password",
+    "NVR_IP": "192.168.1.100",
+    "NVR_PORT": "554",
+    "TOTAL_CHANNELS": 16,
+    "LAST_GRID_SIZE": 3,
+    "GRID_MAPPING": ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+}
