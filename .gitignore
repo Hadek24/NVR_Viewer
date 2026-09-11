@@ -1,0 +1,18 @@
+# Configuración local (¡Muy importante para proteger tu contraseña!)
+config.json
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de configuración de entornos virtuales (si usás uno)
+.venv/
+venv/
+env/
+
+# Archivos de configuración de Geany u otros editores
+*.geany
+.idea/
+.vscode/
