@@ -6,10 +6,10 @@ The project was created as a personal lab project to replace a heavier video sur
 
 ## Features
 
-Current version — v1.0.0
+Current version — v1.1.0
 
 * PyQt6 graphical interface
-* VLC-based video playback
+* ffmpeg-based video playback
 * RTSP streams from Hikvision NVR
 * Configurable number of camera channels
 * 2x2, 3x3 and 4x4 grid layouts
@@ -25,22 +25,21 @@ Current version — v1.0.0
 * Linux
 * Python 3
 * PyQt6
-* VLC
-* python-vlc
+* ffmpeg installed and available in the PATH
 * A Hikvision-compatible NVR/camera system providing RTSP streams
 
 ## Installation
 
 Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
-cd YOUR_REPOSITORY
+git clone https://github.com/Hadek24/NVR_Viewer.git
+cd NVR_Viewer
 ```
 
 Install the required system packages:
 ```bash
 sudo apt update
-sudo apt install vlc python3-pyqt6 python3-vlc
+sudo apt install ffmpeg python3-pyqt6
 ```
 
 ## Configuration
@@ -55,7 +54,7 @@ cp config.example.json config.json
 Example (`config.json`):
 ```json
 {
-    "NVR_USER": "admin",
+    "NVR_USER": "your_username",
     "NVR_PASS": "your_password",
     "NVR_IP": "192.168.1.100",
     "NVR_PORT": "554",
@@ -84,7 +83,10 @@ Start the application with:
 python3 nvr_viewer.py
 ```
 
-The application connects directly to the NVR using RTSP.
+- The application connects directly to the NVR using RTSP.
+- Select the grid size from the top dropdown menu.
+- Select which camera goes in each square using its specific selector.
+- Double-click a camera to maximize it (switches to main stream); double-click again to return to the grid (reverts to sub-stream).
 
 ## RTSP
 
