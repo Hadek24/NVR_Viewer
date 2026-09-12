@@ -76,9 +76,10 @@ class VideoFrame(QWidget):
         self.update()
 
     def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), Qt.GlobalColor.black)
         if self.image is None:
             return
-        painter = QPainter(self)
         pixmap = QPixmap.fromImage(self.image)
         pixmap = pixmap.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         x = (self.width() - pixmap.width()) // 2
@@ -156,8 +157,12 @@ class CameraWidget(QWidget):
             self.ffmpeg_thread.stop()
             self.ffmpeg_thread.wait(1000)
             self.ffmpeg_thread = None
+        self.video_frame.image = None
+        self.video_frame.update()
 
     def handle_frame(self, image):
+        if self.sender() != self.ffmpeg_thread:
+            return
         self.video_frame.set_image(image)
 
     def handle_stream_ready(self):
@@ -174,8 +179,6 @@ class CameraWidget(QWidget):
         if new_channel != self.current_channel:
             self.current_channel = new_channel
             self.stop_stream()
-            self.video_frame.image = None
-            self.video_frame.update()
             if self.current_channel != "Vacío":
                 self.play_stream("2")
             else:
