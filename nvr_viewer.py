@@ -146,11 +146,12 @@ class CameraWidget(QWidget):
             width, height = 2560, 1440
         else:
             width, height = 640, 360
-        self.ffmpeg_thread = FFmpegThread(url, width, height)
-        self.ffmpeg_thread.frame_ready.connect(self.handle_frame)
-        self.ffmpeg_thread.stream_ready.connect(self.handle_stream_ready)
-        self.ffmpeg_thread.stream_error.connect(self.handle_stream_error)
-        self.ffmpeg_thread.start()
+        thread = FFmpegThread(url, width, height)
+        thread.frame_ready.connect(lambda image, t=thread: self.handle_frame(image, t))
+        thread.stream_ready.connect(self.handle_stream_ready)
+        thread.stream_error.connect(self.handle_stream_error)
+        self.ffmpeg_thread = thread
+        thread.start()
 
     def stop_stream(self):
         if self.ffmpeg_thread:
@@ -160,8 +161,8 @@ class CameraWidget(QWidget):
         self.video_frame.image = None
         self.video_frame.update()
 
-    def handle_frame(self, image):
-        if self.sender() != self.ffmpeg_thread:
+    def handle_frame(self, image, thread):
+        if thread is not self.ffmpeg_thread:
             return
         self.video_frame.set_image(image)
 
@@ -182,6 +183,7 @@ class CameraWidget(QWidget):
             if self.current_channel != "Vacío":
                 self.play_stream("2")
             else:
+                self.video_frame.set_image(None)
                 self.status_label.setText("")
             self.parent_grid.save_current_mapping()
 
