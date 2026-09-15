@@ -3,7 +3,7 @@ import json
 import os
 import subprocess
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QLabel)
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import Qt, QThread, QTimer, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap, QPainter
 
 
@@ -100,6 +100,9 @@ class CameraWidget(QWidget):
         self.config = config
         self.ffmpeg_thread = None
         self.is_muted = True
+        self.connection_timer = QTimer(self)
+        self.connection_timer.setSingleShot(True)
+        self.connection_timer.timeout.connect(self.handle_connection_timeout)
         self.init_ui()
         if self.current_channel != "Vacío":
             self.play_stream("2")
@@ -127,6 +130,11 @@ class CameraWidget(QWidget):
         self.audio_btn.setEnabled(False)
         self.audio_btn.setToolTip("Audio pendiente de implementación")
         controls_layout.addWidget(self.audio_btn)
+        self.reconnect_btn = QPushButton("↻")
+        self.reconnect_btn.setFixedWidth(40)
+        self.reconnect_btn.setToolTip("Reconectar")
+        self.reconnect_btn.clicked.connect(self.handle_reconnect)
+        controls_layout.addWidget(self.reconnect_btn)
         self.status_label = QLabel("Desconectado")
         self.status_label.setStyleSheet("color: red; font-weight: bold;")
         controls_layout.addWidget(self.status_label)
@@ -152,8 +160,10 @@ class CameraWidget(QWidget):
         thread.stream_error.connect(self.handle_stream_error)
         self.ffmpeg_thread = thread
         thread.start()
+        self.connection_timer.start(10000)
 
     def stop_stream(self):
+        self.connection_timer.stop()
         if self.ffmpeg_thread:
             self.ffmpeg_thread.stop()
             self.ffmpeg_thread.wait(1000)
@@ -166,7 +176,16 @@ class CameraWidget(QWidget):
             return
         self.video_frame.set_image(image)
 
+    def handle_connection_timeout(self):
+        self.status_label.setStyleSheet("color: red; font-weight: bold;")
+        self.status_label.setText("SIN SEÑAL")
+        if self.ffmpeg_thread:
+            self.ffmpeg_thread.stop()
+            self.ffmpeg_thread.wait(1000)
+            self.ffmpeg_thread = None
+    
     def handle_stream_ready(self):
+        self.connection_timer.stop()
         self.status_label.setStyleSheet("color: green; font-weight: bold;")
         self.status_label.setText("OK")
 
@@ -190,6 +209,11 @@ class CameraWidget(QWidget):
     def toggle_audio(self):
         pass
 
+    def handle_reconnect(self):
+        if self.current_channel == "Vacío":
+            return
+        self.play_stream("2")
+
     def handle_double_click(self):
         if self.current_channel != "Vacío":
             self.parent_grid.handle_camera_double_click(self)
@@ -203,7 +227,7 @@ class CameraWidget(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Monitor NVR Hikvision 1.0.0")
+        self.setWindowTitle("Monitor NVR Hikvision 1.1.1")
         self.resize(1280, 720)
         self.load_config()
         self.cameras = []
